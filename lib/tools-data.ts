@@ -10,19 +10,15 @@ export interface SetupGuide {
   }[]
 }
 
-export type PlanType = 'home' | 'pro'
-export type DurationType = '1-month' | '3-months' | '6-months' | 'lifetime'
+export type DurationType = '1-month' | '3-months' | '6-months' | '1-year' | '2-years' | 'lifetime'
 
 export interface PlanPricing {
   '1-month': number
   '3-months': number
   '6-months': number
+  '1-year': number
+  '2-years': number
   'lifetime': number
-}
-
-export interface ToolPricing {
-  home: PlanPricing
-  pro: PlanPricing
 }
 
 export interface PlanFeature {
@@ -42,11 +38,8 @@ export interface Tool {
   name: string
   description: string
   fullDescription: string
-  pricing: ToolPricing
-  plans: {
-    home: PlanInfo
-    pro: PlanInfo
-  }
+  pricing: PlanPricing
+  plan: PlanInfo
   image: string
   demoVideoId: string
   setupGuides: SetupGuide[]
@@ -56,14 +49,13 @@ export const durationLabels: Record<DurationType, string> = {
   '1-month': '1 Tháng',
   '3-months': '3 Tháng',
   '6-months': '6 Tháng',
+  '1-year': '1 Năm',
+  '2-years': '2 Năm',
   'lifetime': 'Vĩnh viễn',
 }
 
-export function getLowestPrice(pricing: ToolPricing): number {
-  const allPrices = [
-    ...Object.values(pricing.home),
-    ...Object.values(pricing.pro),
-  ]
+export function getLowestPrice(pricing: PlanPricing): number {
+  const allPrices = Object.values(pricing);
   return Math.min(...allPrices)
 }
 
@@ -73,59 +65,38 @@ export const tools: Tool[] = [
     slug: 'viking-rise-auto',
     name: 'Viking Rise Auto',
     description: 'Tự động hóa trò chơi Viking Rise của bạn với bot thông minh',
-    fullDescription: 'Viking Rise Auto là một công cụ tự động hóa mạnh mẽ được thiết kế cho người chơi Viking Rise. Nó tự động xử lý các nhiệm vụ lặp đi lặp lại, tối ưu hóa tiến trình của bạn trong khi bạn tập trung vào chiến lược. Các tính năng bao gồm tự động farm, quản lý tài nguyên và AI ra quyết định thông minh.',
+    fullDescription: 'Viking Rise Auto là công cụ hỗ trợ quản lý nhiều tài khoản và tự động hóa các chuỗi nhiệm vụ lặp đi lặp lại như: thu thập tài nguyên, đánh Niflung, nhận thưởng và quyên góp Clan. Mức độ tự động hóa của phần mềm đạt khoảng 90%. Phần lớn thời gian tool sẽ tự động xoay vòng tài khoản và xử lý lỗi cơ bản, nhưng trong một số trường hợp game bị kẹt giao diện không xác định (giả lập delay, mất mạng, thông báo bất ngờ...), người dùng sẽ cần can thiệp thủ công một chút (kéo về các màn hình cơ sở) để tool nhận diện và tiếp tục tự động gỡ kẹt.',
     pricing: {
-      home: {
-        '1-month': 9.99,
-        '3-months': 24.99,
-        '6-months': 44.99,
-        'lifetime': 79.99,
+        '1-month': 400000,
+        '3-months': 1000000,
+        '6-months': 2000000,
+        '1-year': 3500000,
+        '2-years': 5000000,
+        'lifetime': 8000000,
       },
-      pro: {
-        '1-month': 19.99,
-        '3-months': 49.99,
-        '6-months': 89.99,
-        'lifetime': 149.99,
-      },
-    },
-    plans: {
-      home: {
-        name: 'Cơ bản',
-        description: 'Tự động hóa cần thiết cho người chơi bình thường',
+    plan: {
+        name: 'Tiêu chuẩn',
+        description: 'Đầy đủ tính năng',
         features: [
-          { text: 'Tự động farm cơ bản', included: true },
-          { text: 'Thu thập tài nguyên', included: true },
-          { text: 'Hỗ trợ 1 tài khoản', included: true },
-          { text: 'Hỗ trợ qua Email', included: true },
-          { text: 'Chiến lược AI nâng cao', included: false },
-          { text: 'Quản lý nhiều tài khoản', included: false },
-          { text: 'Tùy chỉnh quy tắc tự động', included: false },
-          { text: 'Hỗ trợ ưu tiên 24/7', included: false },
+          { text: 'Giao diện Control Panel trực quan, dễ sử dụng', included: true },
+          { text: 'Quản lý đa giả lập & Tài khoản không giới hạn', included: true },
+          { text: 'Tự động mở game & Dọn dẹp quảng cáo', included: true },
+          { text: 'Tự động chuyển đổi tài khoản và xoay nhân vật', included: true },
+          { text: 'Auto thu thập tài nguyên mỏ (Lúa, Gỗ, Đá, Vàng)', included: true },
+          { text: 'Auto tìm và đánh Niflung Nhỏ theo chu kỳ', included: true },
+          { text: 'Tự động nhận quà thư, VIP & Đóng góp Công nghệ Clan', included: true },
+          { text: 'Chạy nhiệm vụ theo sức mạnh', included: true },
+          { text: 'Hệ thống Cứu hộ đa tầng (Tự động lùi về Home gỡ kẹt)', included: true }
         ],
       },
-      pro: {
-        name: 'Chuyên nghiệp',
-        description: 'Đầy đủ sức mạnh cho người chơi cạnh tranh',
-        features: [
-          { text: 'Tự động farm cơ bản', included: true },
-          { text: 'Thu thập tài nguyên', included: true },
-          { text: 'Hỗ trợ 1 tài khoản', included: true },
-          { text: 'Hỗ trợ qua Email', included: true },
-          { text: 'Chiến lược AI nâng cao', included: true },
-          { text: 'Quản lý nhiều tài khoản', included: true },
-          { text: 'Tùy chỉnh quy tắc tự động', included: true },
-          { text: 'Hỗ trợ ưu tiên 24/7', included: true },
-        ],
-      },
-    },
     image: 'https://res.cloudinary.com/dkrrib3mb/image/upload/v1777108493/Untitled_vdwbze.jpg',
     demoVideoId: 'dQw4w9WgXcQ',
     setupGuides: [
       {
         id: 'g1',
-        title: 'Initial Setup & Installation',
-        description: 'Learn how to install Viking Rise Auto, configure your account connection, and set up basic automation parameters for your gaming style.',
-        youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        title: 'Cài đặt, cấu hình giả lập và game',
+        description: 'Hướng dẫn cài đặt, cấu hình giả lập và game',
+        youtubeLink: 'https://youtu.be/D40PhKpMjDc?si=K5WQ5zhKHxWXMq3m',
         steps: [
           { number: 1, title: 'Download & Install', description: 'Download Viking Rise Auto from the official website and run the installer' },
           { number: 2, title: 'Connect Your Account', description: 'Link your Viking Rise game account using secure OAuth authentication' },
@@ -135,9 +106,9 @@ export const tools: Tool[] = [
       },
       {
         id: 'g2',
-        title: 'Advanced Bot Configuration',
-        description: 'Master the advanced settings for optimal performance. Configure resource farming strategies, hero prioritization, and custom automation rules.',
-        youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        title: 'Cài đặt 1.1.1.1 để chống check IP',
+        description: 'Hướng dẫn cài đặt 1.1.1.1 để chống check IP',
+        youtubeLink: 'https://youtu.be/spCFhXw_f9M?si=DvB6TSWF8gu-iOPV',
         steps: [
           { number: 1, title: 'Access Settings Panel', description: 'Open the Advanced Settings tab in the main application window' },
           { number: 2, title: 'Configure Farming Strategy', description: 'Set resource farming priorities: gold, wood, food, stone ratios' },
@@ -148,9 +119,9 @@ export const tools: Tool[] = [
       },
       {
         id: 'g3',
-        title: 'Troubleshooting & Optimization',
-        description: 'Solve common issues and optimize your bot for maximum efficiency. Learn about performance tuning and account safety best practices.',
-        youtubeLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        title: 'Hướng dẫn cài và kích hoạt TOOL',
+        description: 'Hướng dẫn cài và kích hoạt TOOL',
+        youtubeLink: 'https://youtu.be/TSKBHjW_UGY?si=cu2ylbxqASYob4wD',
         steps: [
           { number: 1, title: 'Enable Debug Mode', description: 'Turn on debug logging to identify issues in bot execution' },
           { number: 2, title: 'Check Logs', description: 'Review the detailed log files to troubleshoot specific problems' },
@@ -167,37 +138,16 @@ export const tools: Tool[] = [
     description: 'Bot Discord/Telegram quản lý cộng đồng và trả lời tự động',
     fullDescription: 'PingMe Network Bot là giải pháp toàn diện để quản lý cộng đồng Discord hoặc Telegram của bạn. Tự động hóa kiểm duyệt, xử lý hỗ trợ khách hàng, quản lý thông báo và tương tác với thành viên thông qua các phản hồi bot thông minh.',
     pricing: {
-      home: {
-        '1-month': 7.99,
-        '3-months': 19.99,
-        '6-months': 34.99,
-        'lifetime': 59.99,
+        '1-month': 300000,
+        '3-months': 800000,
+        '6-months': 1500000,
+        '1-year': 2500000,
+        '2-years': 4000000,
+        'lifetime': 6000000,
       },
-      pro: {
-        '1-month': 14.99,
-        '3-months': 39.99,
-        '6-months': 69.99,
-        'lifetime': 119.99,
-      },
-    },
-    plans: {
-      home: {
-        name: 'Cơ bản',
-        description: 'Quản lý cộng đồng cơ bản',
-        features: [
-          { text: 'Tự động kiểm duyệt', included: true },
-          { text: 'Lệnh cơ bản', included: true },
-          { text: '1 máy chủ/nhóm', included: true },
-          { text: 'Hỗ trợ qua Email', included: true },
-          { text: 'Phân tích nâng cao', included: false },
-          { text: 'Không giới hạn máy chủ', included: false },
-          { text: 'Tích hợp tùy chỉnh', included: false },
-          { text: 'Hỗ trợ ưu tiên 24/7', included: false },
-        ],
-      },
-      pro: {
-        name: 'Chuyên nghiệp',
-        description: 'Trải nghiệm quản lý cộng đồng toàn diện',
+    plan: {
+        name: 'Tiêu chuẩn',
+        description: 'Đầy đủ tính năng',
         features: [
           { text: 'Tự động kiểm duyệt', included: true },
           { text: 'Lệnh cơ bản', included: true },
@@ -209,7 +159,6 @@ export const tools: Tool[] = [
           { text: 'Hỗ trợ ưu tiên 24/7', included: true },
         ],
       },
-    },
     image: 'https://res.cloudinary.com/dkrrib3mb/image/upload/v1777112850/unnamed_z3pwpq.png',
     demoVideoId: 'dQw4w9WgXcQ',
     setupGuides: [
@@ -272,37 +221,16 @@ export const tools: Tool[] = [
     description: 'Tự động hóa macro nâng cao cho trình giả lập game di động',
     fullDescription: 'FC Hàn Auto cung cấp khả năng tự động hóa và ghi macro mạnh mẽ cho các trình giả lập game di động. Tạo chuỗi thao tác phức tạp, xử lý vòng lặp gameplay lặp đi lặp lại và tự động farm với khả năng kiểm soát chính xác và độ tin cậy cao.',
     pricing: {
-      home: {
-        '1-month': 14.99,
-        '3-months': 34.99,
-        '6-months': 59.99,
-        'lifetime': 99.99,
+        '1-month': 600000,
+        '3-months': 1500000,
+        '6-months': 2800000,
+        '1-year': 4500000,
+        '2-years': 8000000,
+        'lifetime': 12000000,
       },
-      pro: {
-        '1-month': 24.99,
-        '3-months': 64.99,
-        '6-months': 109.99,
-        'lifetime': 199.99,
-      },
-    },
-    plans: {
-      home: {
-        name: 'Cơ bản',
-        description: 'Công cụ ghi macro thiết yếu',
-        features: [
-          { text: 'Ghi macro cơ bản', included: true },
-          { text: 'Hỗ trợ 1 trình giả lập', included: true },
-          { text: 'Lưu 5 macro', included: true },
-          { text: 'Hỗ trợ qua Email', included: true },
-          { text: 'Tạo script nâng cao', included: false },
-          { text: 'Hỗ trợ nhiều trình giả lập', included: false },
-          { text: 'Không giới hạn macro', included: false },
-          { text: 'Hỗ trợ ưu tiên 24/7', included: false },
-        ],
-      },
-      pro: {
-        name: 'Chuyên nghiệp',
-        description: 'Bộ tự động hóa chuẩn chuyên nghiệp',
+    plan: {
+        name: 'Tiêu chuẩn',
+        description: 'Đầy đủ tính năng',
         features: [
           { text: 'Ghi macro cơ bản', included: true },
           { text: 'Hỗ trợ 1 trình giả lập', included: true },
@@ -314,7 +242,6 @@ export const tools: Tool[] = [
           { text: 'Hỗ trợ ưu tiên 24/7', included: true },
         ],
       },
-    },
     image: 'https://res.cloudinary.com/dkrrib3mb/image/upload/v1777108568/Untitled_q1axcs.jpg',
     demoVideoId: 'dQw4w9WgXcQ',
     setupGuides: [
@@ -390,37 +317,16 @@ export const tools: Tool[] = [
     description: 'Tự động hóa macro nâng cao cho trình giả lập game di động',
     fullDescription: 'Garena Auto Login cung cấp khả năng tự động hóa và ghi macro mạnh mẽ cho các trình giả lập game di động. Tạo chuỗi thao tác phức tạp, xử lý vòng lặp gameplay lặp đi lặp lại và tự động farm với khả năng kiểm soát chính xác và độ tin cậy cao.',
     pricing: {
-      home: {
-        '1-month': 14.99,
-        '3-months': 34.99,
-        '6-months': 59.99,
-        'lifetime': 99.99,
+        '1-month': 600000,
+        '3-months': 1500000,
+        '6-months': 2800000,
+        '1-year': 4500000,
+        '2-years': 8000000,
+        'lifetime': 12000000,
       },
-      pro: {
-        '1-month': 24.99,
-        '3-months': 64.99,
-        '6-months': 109.99,
-        'lifetime': 199.99,
-      },
-    },
-    plans: {
-      home: {
-        name: 'Cơ bản',
-        description: 'Công cụ ghi macro thiết yếu',
-        features: [
-          { text: 'Ghi macro cơ bản', included: true },
-          { text: 'Hỗ trợ 1 trình giả lập', included: true },
-          { text: 'Lưu 5 macro', included: true },
-          { text: 'Hỗ trợ qua Email', included: true },
-          { text: 'Tạo script nâng cao', included: false },
-          { text: 'Hỗ trợ nhiều trình giả lập', included: false },
-          { text: 'Không giới hạn macro', included: false },
-          { text: 'Hỗ trợ ưu tiên 24/7', included: false },
-        ],
-      },
-      pro: {
-        name: 'Chuyên nghiệp',
-        description: 'Bộ tự động hóa chuẩn chuyên nghiệp',
+    plan: {
+        name: 'Tiêu chuẩn',
+        description: 'Đầy đủ tính năng',
         features: [
           { text: 'Ghi macro cơ bản', included: true },
           { text: 'Hỗ trợ 1 trình giả lập', included: true },
@@ -432,7 +338,6 @@ export const tools: Tool[] = [
           { text: 'Hỗ trợ ưu tiên 24/7', included: true },
         ],
       },
-    },
     image: 'https://res.cloudinary.com/dkrrib3mb/image/upload/v1777108583/Untitled_p7h9uk.png',
     demoVideoId: 'dQw4w9WgXcQ',
     setupGuides: [

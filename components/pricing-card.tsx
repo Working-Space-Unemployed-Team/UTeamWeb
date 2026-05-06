@@ -1,107 +1,70 @@
 'use client'
 
 import { useState } from 'react'
-import { Tool, PlanType, DurationType, durationLabels } from '@/lib/tools-data'
+import { Tool, DurationType, durationLabels } from '@/lib/tools-data'
 import { ContactClient } from './contact-client'
-import { Check, X, Crown, Home, Sparkles } from 'lucide-react'
+import { Check, X, Sparkles } from 'lucide-react'
 
 interface PricingCardProps {
   tool: Tool
 }
 
-const durations: DurationType[] = ['1-month', '3-months', '6-months', 'lifetime']
+const durations: DurationType[] = ['1-month', '3-months', '6-months', '1-year', '2-years', 'lifetime']
 
 export function PricingCard({ tool }: PricingCardProps) {
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>('pro')
   const [selectedDuration, setSelectedDuration] = useState<DurationType>('1-month')
 
-  const currentPrice = tool.pricing[selectedPlan][selectedDuration]
-  const planInfo = tool.plans[selectedPlan]
+  const currentPrice = tool.pricing[selectedDuration]
+  const planInfo = tool.plan
   const isLifetime = selectedDuration === 'lifetime'
 
   // Calculate monthly equivalent for multi-month plans
-  const getMonthlyEquivalent = (duration: DurationType, plan: PlanType) => {
-    const price = tool.pricing[plan][duration]
+  const getMonthlyEquivalent = (duration: DurationType) => {
+    const price = tool.pricing[duration]
     switch (duration) {
       case '3-months': return price / 3
       case '6-months': return price / 6
+      case '1-year': return price / 12
+      case '2-years': return price / 24
       default: return null
     }
   }
 
   // Calculate savings percentage vs 1-month
-  const getSavings = (duration: DurationType, plan: PlanType) => {
-    if (duration === '1-month') return null
-    const monthlyPrice = tool.pricing[plan]['1-month']
+  const getSavings = (duration: DurationType) => {
+    if (duration === '1-month' || duration === 'lifetime') return null
+    const monthlyPrice = tool.pricing['1-month']
     const totalIfMonthly = duration === '3-months' ? monthlyPrice * 3
       : duration === '6-months' ? monthlyPrice * 6
-      : monthlyPrice * 12
-    const actualPrice = tool.pricing[plan][duration]
+      : duration === '1-year' ? monthlyPrice * 12
+      : monthlyPrice * 24 // 2-years
+    const actualPrice = tool.pricing[duration]
     return Math.round(((totalIfMonthly - actualPrice) / totalIfMonthly) * 100)
   }
 
-  const monthlyEquiv = getMonthlyEquivalent(selectedDuration, selectedPlan)
-  const savings = getSavings(selectedDuration, selectedPlan)
+  const monthlyEquiv = getMonthlyEquivalent(selectedDuration)
+  const savings = getSavings(selectedDuration)
 
   return (
     <div className="space-y-5">
-      {/* Plan Toggle */}
-      <div className="relative flex rounded-xl bg-muted/50 p-1 border border-muted/30">
-        {(['home', 'pro'] as PlanType[]).map((plan) => (
-          <button
-            key={plan}
-            onClick={() => setSelectedPlan(plan)}
-            className={`
-              relative flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300
-              ${selectedPlan === plan
-                ? plan === 'pro'
-                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25'
-                  : 'bg-card text-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground'
-              }
-            `}
-          >
-            {plan === 'home' ? (
-              <Home className="w-4 h-4" />
-            ) : (
-              <Crown className="w-4 h-4" />
-            )}
-            {plan === 'home' ? 'Home' : 'Pro'}
-            {plan === 'pro' && selectedPlan !== 'pro' && (
-              <span className="absolute -top-2 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full">
-                TỐT NHẤT
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
       {/* Pricing Card */}
-      <div className={`
-        relative p-6 rounded-xl border transition-all duration-300 overflow-hidden
-        ${selectedPlan === 'pro'
-          ? 'bg-gradient-to-br from-card via-card to-violet-950/10 border-violet-500/30 shadow-lg shadow-violet-500/5'
-          : 'bg-card border-muted/20'
-        }
-      `}>
-        {/* Pro badge glow effect */}
-        {selectedPlan === 'pro' && (
-          <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-        )}
+      <div className="relative p-6 rounded-xl border transition-all duration-300 overflow-hidden bg-gradient-to-br from-card via-card to-violet-950/10 border-violet-500/30 shadow-lg shadow-violet-500/5">
+        {/* Glow effect */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
         {/* Plan name & description */}
         <div className="relative mb-5">
           <div className="flex items-center gap-2 mb-1">
-            {selectedPlan === 'pro' && <Sparkles className="w-4 h-4 text-violet-400" />}
+            <Sparkles className="w-4 h-4 text-violet-400" />
             <h3 className="text-lg font-bold text-foreground">{planInfo.name}</h3>
           </div>
           <p className="text-xs text-muted-foreground">{planInfo.description}</p>
         </div>
 
         {/* Duration Selector */}
-        <div className="relative grid grid-cols-2 gap-2 mb-6">
+        <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
           {durations.map((duration) => {
-            const dSavings = getSavings(duration, selectedPlan)
+            const dSavings = getSavings(duration)
             return (
               <button
                 key={duration}
@@ -109,9 +72,7 @@ export function PricingCard({ tool }: PricingCardProps) {
                 className={`
                   relative py-2.5 px-3 rounded-lg text-xs font-medium transition-all duration-200 border
                   ${selectedDuration === duration
-                    ? selectedPlan === 'pro'
-                      ? 'bg-violet-600/15 border-violet-500/50 text-foreground shadow-sm'
-                      : 'bg-primary/10 border-primary/30 text-foreground shadow-sm'
+                    ? 'bg-violet-600/15 border-violet-500/50 text-foreground shadow-sm'
                     : 'bg-transparent border-muted/20 text-muted-foreground hover:border-muted/40 hover:text-foreground'
                   }
                 `}
@@ -121,7 +82,7 @@ export function PricingCard({ tool }: PricingCardProps) {
                   <span className={`
                     block text-[10px] mt-0.5 font-semibold
                     ${selectedDuration === duration
-                      ? selectedPlan === 'pro' ? 'text-emerald-400' : 'text-emerald-500'
+                      ? 'text-emerald-400'
                       : 'text-emerald-500/70'
                     }
                   `}>
@@ -137,11 +98,11 @@ export function PricingCard({ tool }: PricingCardProps) {
         <div className="relative mb-6">
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-extrabold tracking-tight text-foreground">
-              ${currentPrice.toFixed(2)}
+              {new Intl.NumberFormat('vi-VN').format(currentPrice)} VNĐ
             </span>
             {!isLifetime && (
               <span className="text-sm text-muted-foreground">
-                /{selectedDuration === '1-month' ? 'tháng' : selectedDuration === '3-months' ? '3 tháng' : '6 tháng'}
+                /{selectedDuration === '1-month' ? 'tháng' : selectedDuration === '3-months' ? '3 tháng' : selectedDuration === '6-months' ? '6 tháng' : selectedDuration === '1-year' ? 'năm' : '2 năm'}
               </span>
             )}
           </div>
@@ -150,7 +111,7 @@ export function PricingCard({ tool }: PricingCardProps) {
           )}
           {monthlyEquiv && (
             <p className="text-xs text-muted-foreground mt-1">
-              ≈ ${monthlyEquiv.toFixed(2)}/tháng
+              ≈ {new Intl.NumberFormat('vi-VN').format(monthlyEquiv)} VNĐ/tháng
               {savings && <span className="text-emerald-500 font-semibold ml-1">(giảm {savings}%)</span>}
             </p>
           )}
@@ -174,10 +135,7 @@ export function PricingCard({ tool }: PricingCardProps) {
               }`}
             >
               {feature.included ? (
-                <div className={`
-                  flex-shrink-0 w-4.5 h-4.5 rounded-full flex items-center justify-center
-                  ${selectedPlan === 'pro' ? 'text-violet-400' : 'text-emerald-500'}
-                `}>
+                <div className="flex-shrink-0 w-4.5 h-4.5 rounded-full flex items-center justify-center text-violet-400">
                   <Check className="w-3.5 h-3.5" strokeWidth={3} />
                 </div>
               ) : (

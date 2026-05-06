@@ -40,7 +40,7 @@ export function ProductCard({ tool }: ProductCardProps) {
               <div>
                 <p className="text-xs text-muted-foreground">Giá từ</p>
                 <p className="text-2xl font-bold text-foreground">
-                  ${lowestPrice.toFixed(2)}
+                  {new Intl.NumberFormat('vi-VN').format(lowestPrice)} VNĐ
                 </p>
               </div>
 
